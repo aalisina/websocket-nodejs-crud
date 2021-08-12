@@ -21,12 +21,12 @@ io.on('connection', (socket) => {
       id: uuid(),
     };
     notes.push(note);
-    socket.emit('server:newnote', note);
+    io.emit('server:newnote', note);
   });
 
   socket.on('client:deletenote', (noteId) => {
     notes = notes.filter((note) => note.id !== noteId);
-    socket.emit('server:loadnotes', notes);
+    io.emit('server:loadnotes', notes);
   });
 
   socket.on('client:getnote', (noteId) => {
@@ -41,7 +41,7 @@ io.on('connection', (socket) => {
       }
       return note;
     });
-    socket.emit('server:loadnotes', notes);
+    io.emit('server:loadnotes', notes);
   });
 });
 
