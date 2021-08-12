@@ -3,7 +3,7 @@ import { Server as WebSocketServer } from 'socket.io';
 import http from 'http';
 import { v4 as uuid } from 'uuid';
 
-const notes = [];
+let notes = [];
 const app = express();
 const httpServer = http.createServer(app);
 const io = new WebSocketServer(httpServer);
@@ -21,7 +21,27 @@ io.on('connection', (socket) => {
       id: uuid(),
     };
     notes.push(note);
-    socket.emit('server:newnote', newNote);
+    socket.emit('server:newnote', note);
+  });
+
+  socket.on('client:deletenote', (noteId) => {
+    notes = notes.filter((note) => note.id !== noteId);
+    socket.emit('server:loadnotes', notes);
+  });
+
+  socket.on('client:getnote', (noteId) => {
+    const note = notes.find((n) => n.id === noteId);
+    socket.emit('server:selectednote', note);
+  });
+  socket.on('client:updatenote', (updatedNote) => {
+    notes = notes.map((note) => {
+      if (note.id === updatedNote.id) {
+        note.title = updatedNote.title,
+        note.description = updatedNote.description;
+      }
+      return note;
+    });
+    socket.emit('server:loadnotes', notes);
   });
 });
 
